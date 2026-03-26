@@ -124,7 +124,7 @@ const UI = {
             const currentVal = select.value;
             const firstOpt = select.querySelector('option');
             select.innerHTML = '';
-            select.appendChild(firstOpt);
+            if (firstOpt) select.appendChild(firstOpt);
 
             this._addCatOptions(select, null, 0);
             select.value = currentVal;
