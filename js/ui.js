@@ -19,6 +19,7 @@ const UI = {
             btn.addEventListener('click', () => {
                 const view = btn.dataset.view;
                 this.switchView(view);
+                this._closeSidebar();
             });
         });
     },
@@ -48,9 +49,42 @@ const UI = {
 
     // ---------- SIDEBAR TOGGLE ----------
     bindSidebarToggle() {
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
         document.getElementById('sidebar-toggle').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('open');
+            this._toggleSidebar();
         });
+        backdrop.addEventListener('click', () => {
+            this._closeSidebar();
+        });
+    },
+
+    _isMobile() {
+        return window.innerWidth < 768;
+    },
+
+    _toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        const isOpen = sidebar.classList.contains('translate-x-0');
+        if (isOpen) {
+            sidebar.classList.remove('translate-x-0');
+            sidebar.classList.add('-translate-x-full');
+            backdrop.classList.remove('active');
+        } else {
+            sidebar.classList.remove('-translate-x-full');
+            sidebar.classList.add('translate-x-0');
+            backdrop.classList.add('active');
+        }
+    },
+
+    _closeSidebar() {
+        if (!this._isMobile()) return;
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        sidebar.classList.remove('translate-x-0');
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.remove('active');
     },
 
     // ---------- TOAST ----------
@@ -93,6 +127,7 @@ const UI = {
                 document.getElementById('filter-category').value = cat.id;
                 this.switchView('tasks');
                 this.renderTasksList();
+                this._closeSidebar();
             });
             item.querySelector('.cat-edit').addEventListener('click', (e) => {
                 e.stopPropagation();

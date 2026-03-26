@@ -167,9 +167,20 @@
 }
 
 /* Sidebar responsive */
-@media (max-width: 768px) {
-    .sidebar { transform: translateX(-100%); }
-    .sidebar.open { transform: translateX(0); }
-    #main-content { margin-left: 0 !important; }
+@media (max-width: 767px) {
     #sidebar-toggle { display: inline-flex !important; }
+
+    /* Sidebar backdrop */
+    #sidebar-backdrop.active { display: block !important; }
+
+    /* FullCalendar mobile toolbar stacking */
+    .fc .fc-toolbar { flex-direction: column; gap: 8px; }
+    .fc .fc-toolbar-title { font-size: 0.95rem; }
+    .fc .fc-button { font-size: 0.7rem !important; padding: 4px 8px !important; }
+
+    /* Task meta wrapping */
+    .task-meta { flex-wrap: wrap; gap: 6px; }
+
+    /* Toast narrower on mobile */
+    .toast { max-width: calc(100vw - 32px); }
 }
