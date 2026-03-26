@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskTracker — Your Life, Organized</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- FullCalendar -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <!-- FullCalendar -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js"></script>
+    <!-- D3 for tree visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+</head>
+<body>
+    <!-- ===== SIDEBAR ===== -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h1 class="logo"><span class="logo-icon">✓</span> TaskTracker</h1>
+        </div>
+        <nav class="sidebar-nav">
+            <button class="nav-btn active" data-view="dashboard">
+                <i data-lucide="layout-dashboard"></i> Dashboard
+            </button>
+            <button class="nav-btn" data-view="tasks">
+                <i data-lucide="check-square"></i> All Tasks
+            </button>
+            <button class="nav-btn" data-view="calendar">
+                <i data-lucide="calendar"></i> Calendar
+            </button>
+            <button class="nav-btn" data-view="tree">
+                <i data-lucide="git-branch"></i> Category Map
+            </button>
+        </nav>
+        <div class="sidebar-categories">
+            <div class="sidebar-section-header">
+                <h3>Categories</h3>
+                <button id="btn-add-category" class="btn-icon" title="Add Category">
+                    <i data-lucide="plus"></i>
+                </button>
+            </div>
+            <ul id="category-tree" class="category-tree"></ul>
+        </div>
+    </aside>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main id="main-content" class="main-content">
+        <!-- Top bar -->
+        <header class="topbar">
+            <button id="sidebar-toggle" class="btn-icon mobile-only">
+                <i data-lucide="menu"></i>
+            </button>
+            <div class="topbar-left">
+                <h2 id="view-title">Dashboard</h2>
+            </div>
+            <div class="topbar-right">
+                <button id="btn-add-task" class="btn-primary">
+                    <i data-lucide="plus"></i> New Task
+                </button>
+            </div>
+        </header>
+
+        <!-- Dashboard View -->
+        <section id="view-dashboard" class="view active">
+            <div class="dashboard-stats">
+                <div class="stat-card stat-overdue">
+                    <div class="stat-number" id="stat-overdue">0</div>
+                    <div class="stat-label">Overdue</div>
+                </div>
+                <div class="stat-card stat-today">
+                    <div class="stat-number" id="stat-today">0</div>
+                    <div class="stat-label">Due Today</div>
+                </div>
+                <div class="stat-card stat-week">
+                    <div class="stat-number" id="stat-week">0</div>
+                    <div class="stat-label">This Week</div>
+                </div>
+                <div class="stat-card stat-total">
+                    <div class="stat-number" id="stat-total">0</div>
+                    <div class="stat-label">Total Active</div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Overdue & Today -->
+                <div class="dashboard-panel">
+                    <h3 class="panel-title"><i data-lucide="alert-triangle"></i> Overdue & Due Today</h3>
+                    <div id="dashboard-urgent" class="task-list"></div>
+                </div>
+                <!-- Upcoming this week -->
+                <div class="dashboard-panel">
+                    <h3 class="panel-title"><i data-lucide="clock"></i> Coming Up This Week</h3>
+                    <div id="dashboard-upcoming" class="task-list"></div>
+                </div>
+                <!-- Category progress -->
+                <div class="dashboard-panel full-width">
+                    <h3 class="panel-title"><i data-lucide="bar-chart-3"></i> Category Progress</h3>
+                    <div id="dashboard-progress" class="progress-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tasks View -->
+        <section id="view-tasks" class="view">
+            <div class="tasks-toolbar">
+                <div class="filter-group">
+                    <select id="filter-category" class="filter-select">
+                        <option value="">All Categories</option>
+                    </select>
+                    <select id="filter-priority" class="filter-select">
+                        <option value="">All Priorities</option>
+                        <option value="critical">Critical</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                    <select id="filter-status" class="filter-select">
+                        <option value="">All Statuses</option>
+                        <option value="not_started">Not Started</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="search-box">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="task-search" placeholder="Search tasks...">
+                </div>
+            </div>
+            <div id="tasks-list" class="task-list"></div>
+        </section>
+
+        <!-- Calendar View -->
+        <section id="view-calendar" class="view">
+            <div id="calendar-container"></div>
+        </section>
+
+        <!-- Tree View -->
+        <section id="view-tree" class="view">
+            <div class="tree-toolbar">
+                <button id="tree-zoom-in" class="btn-icon" title="Zoom In"><i data-lucide="zoom-in"></i></button>
+                <button id="tree-zoom-out" class="btn-icon" title="Zoom Out"><i data-lucide="zoom-out"></i></button>
+                <button id="tree-reset" class="btn-icon" title="Reset View"><i data-lucide="maximize-2"></i></button>
+            </div>
+            <div id="tree-container"></div>
+        </section>
+    </main>
+
+    <!-- ===== TASK MODAL ===== -->
+    <div id="task-modal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">New Task</h3>
+                <button id="modal-close" class="btn-icon"><i data-lucide="x"></i></button>
+            </div>
+            <form id="task-form" class="modal-body">
+                <input type="hidden" id="task-id">
+                <div class="form-group">
+                    <label for="task-title-input">Title *</label>
+                    <input type="text" id="task-title-input" required placeholder="What needs to be done?">
+                </div>
+                <div class="form-group">
+                    <label for="task-desc-input">Description</label>
+                    <textarea id="task-desc-input" rows="3" placeholder="Additional details..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="task-category-input">Category</label>
+                        <select id="task-category-input"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-priority-input">Priority</label>
+                        <select id="task-priority-input">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="task-due-input">Due Date</label>
+                        <input type="date" id="task-due-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="task-scheduled-input">Scheduled Date</label>
+                        <input type="date" id="task-scheduled-input">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="task-status-input">Status</label>
+                        <select id="task-status-input">
+                            <option value="not_started">Not Started</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="form-group form-check-group">
+                        <label>
+                            <input type="checkbox" id="task-recurring-input"> Recurring
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group hidden" id="recurrence-group">
+                    <label for="task-recurrence-input">Recurrence</label>
+                    <select id="task-recurrence-input">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="biweekly">Bi-Weekly</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="btn-delete-task" class="btn-danger hidden">Delete</button>
+                    <div class="modal-footer-right">
+                        <button type="button" id="btn-cancel-task" class="btn-secondary">Cancel</button>
+                        <button type="submit" class="btn-primary">Save Task</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== CATEGORY MODAL ===== -->
+    <div id="category-modal" class="modal-overlay hidden">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h3 id="cat-modal-title">New Category</h3>
+                <button id="cat-modal-close" class="btn-icon"><i data-lucide="x"></i></button>
+            </div>
+            <form id="category-form" class="modal-body">
+                <input type="hidden" id="cat-id">
+                <div class="form-group">
+                    <label for="cat-name-input">Name *</label>
+                    <input type="text" id="cat-name-input" required placeholder="Category name">
+                </div>
+                <div class="form-group">
+                    <label for="cat-parent-input">Parent Category</label>
+                    <select id="cat-parent-input">
+                        <option value="">(Top Level)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cat-color-input">Color</label>
+                    <input type="color" id="cat-color-input" value="#6366f1">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="btn-delete-cat" class="btn-danger hidden">Delete</button>
+                    <div class="modal-footer-right">
+                        <button type="button" id="btn-cancel-cat" class="btn-secondary">Cancel</button>
+                        <button type="submit" class="btn-primary">Save</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== TOAST CONTAINER ===== -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="js/supabase-client.js"></script>
+    <script src="js/store.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/calendar.js"></script>
+    <script src="js/tree.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
