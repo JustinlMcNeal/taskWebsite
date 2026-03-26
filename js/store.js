@@ -7,7 +7,7 @@ const Store = {
 
     // ---------- CATEGORIES ----------
     async fetchCategories() {
-        const { data, error } = await supabase
+        const { data, error } = await db
             .from('categories')
             .select('*')
             .order('sort_order', { ascending: true });
@@ -18,7 +18,7 @@ const Store = {
 
     async createCategory({ name, parent_id, color, icon }) {
         const maxOrder = this.categories.reduce((m, c) => Math.max(m, c.sort_order), -1);
-        const { data, error } = await supabase
+        const { data, error } = await db
             .from('categories')
             .insert({ name, parent_id: parent_id || null, color, icon, sort_order: maxOrder + 1 })
             .select()
@@ -29,7 +29,7 @@ const Store = {
     },
 
     async updateCategory(id, updates) {
-        const { data, error } = await supabase
+        const { data, error } = await db
             .from('categories')
             .update(updates)
             .eq('id', id)
@@ -42,7 +42,7 @@ const Store = {
     },
 
     async deleteCategory(id) {
-        const { error } = await supabase
+        const { error } = await db
             .from('categories')
             .delete()
             .eq('id', id);
@@ -82,7 +82,7 @@ const Store = {
 
     // ---------- TASKS ----------
     async fetchTasks() {
-        const { data, error } = await supabase
+        const { data, error } = await db
             .from('tasks')
             .select('*')
             .order('created_at', { ascending: false });
@@ -92,7 +92,7 @@ const Store = {
     },
 
     async createTask(task) {
-        const { data, error } = await supabase
+        const { data, error } = await db
             .from('tasks')
             .insert(task)
             .select()
@@ -109,7 +109,7 @@ const Store = {
         if (updates.status && updates.status !== 'completed') {
             updates.completed_at = null;
         }
-        const { data, error } = await supabase
+        const { data, error } = await db
             .from('tasks')
             .update(updates)
             .eq('id', id)
@@ -122,7 +122,7 @@ const Store = {
     },
 
     async deleteTask(id) {
-        const { error } = await supabase
+        const { error } = await db
             .from('tasks')
             .delete()
             .eq('id', id);

@@ -1,9 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaskTracker — Your Life, Organized</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        surface: '#1a1d27',
+                        elevated: '#242736',
+                        hovr: '#2d3041',
+                        bdr: '#2d3041',
+                        dim: '#5c6078',
+                    }
+                }
+            }
+        }
+    </script>
     <link rel="stylesheet" href="css/styles.css">
     <!-- FullCalendar -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.css">
@@ -16,31 +34,35 @@
     <!-- D3 for tree visualization -->
     <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 </head>
-<body>
+<body class="bg-[#0f1117] text-gray-200 flex min-h-screen overflow-hidden font-sans">
+
     <!-- ===== SIDEBAR ===== -->
-    <aside id="sidebar" class="sidebar">
-        <div class="sidebar-header">
-            <h1 class="logo"><span class="logo-icon">✓</span> TaskTracker</h1>
+    <aside id="sidebar" class="sidebar w-64 bg-surface border-r border-bdr flex flex-col h-screen fixed left-0 top-0 z-50 transition-transform duration-200">
+        <div class="p-5 border-b border-bdr">
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                <span class="bg-indigo-500 text-white w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold">✓</span>
+                TaskTracker
+            </h1>
         </div>
-        <nav class="sidebar-nav">
-            <button class="nav-btn active" data-view="dashboard">
-                <i data-lucide="layout-dashboard"></i> Dashboard
+        <nav class="p-3 flex flex-col gap-1">
+            <button class="nav-btn active flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg bg-transparent text-gray-400 text-sm font-medium transition-all w-full text-left hover:bg-hovr hover:text-gray-200" data-view="dashboard">
+                <i data-lucide="layout-dashboard" class="w-[18px] h-[18px]"></i> Dashboard
             </button>
-            <button class="nav-btn" data-view="tasks">
-                <i data-lucide="check-square"></i> All Tasks
+            <button class="nav-btn flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg bg-transparent text-gray-400 text-sm font-medium transition-all w-full text-left hover:bg-hovr hover:text-gray-200" data-view="tasks">
+                <i data-lucide="check-square" class="w-[18px] h-[18px]"></i> All Tasks
             </button>
-            <button class="nav-btn" data-view="calendar">
-                <i data-lucide="calendar"></i> Calendar
+            <button class="nav-btn flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg bg-transparent text-gray-400 text-sm font-medium transition-all w-full text-left hover:bg-hovr hover:text-gray-200" data-view="calendar">
+                <i data-lucide="calendar" class="w-[18px] h-[18px]"></i> Calendar
             </button>
-            <button class="nav-btn" data-view="tree">
-                <i data-lucide="git-branch"></i> Category Map
+            <button class="nav-btn flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg bg-transparent text-gray-400 text-sm font-medium transition-all w-full text-left hover:bg-hovr hover:text-gray-200" data-view="tree">
+                <i data-lucide="git-branch" class="w-[18px] h-[18px]"></i> Category Map
             </button>
         </nav>
-        <div class="sidebar-categories">
-            <div class="sidebar-section-header">
-                <h3>Categories</h3>
-                <button id="btn-add-category" class="btn-icon" title="Add Category">
-                    <i data-lucide="plus"></i>
+        <div class="flex-1 overflow-y-auto p-3 border-t border-bdr">
+            <div class="flex items-center justify-between px-2 pb-2">
+                <h3 class="text-xs uppercase tracking-wider text-dim font-semibold">Categories</h3>
+                <button id="btn-add-category" class="p-1.5 rounded-lg text-gray-400 hover:bg-hovr hover:text-gray-200 transition-all" title="Add Category">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
                 </button>
             </div>
             <ul id="category-tree" class="category-tree"></ul>
@@ -48,132 +70,135 @@
     </aside>
 
     <!-- ===== MAIN CONTENT ===== -->
-    <main id="main-content" class="main-content">
+    <main id="main-content" class="ml-64 flex-1 flex flex-col h-screen overflow-hidden">
         <!-- Top bar -->
-        <header class="topbar">
-            <button id="sidebar-toggle" class="btn-icon mobile-only">
-                <i data-lucide="menu"></i>
+        <header class="h-[60px] bg-surface border-b border-bdr flex items-center justify-between px-6 shrink-0">
+            <button id="sidebar-toggle" class="p-1.5 rounded-lg text-gray-400 hover:bg-hovr hover:text-gray-200 transition-all hidden md:hidden" >
+                <i data-lucide="menu" class="w-5 h-5"></i>
             </button>
-            <div class="topbar-left">
-                <h2 id="view-title">Dashboard</h2>
+            <div>
+                <h2 id="view-title" class="text-lg font-semibold">Dashboard</h2>
             </div>
-            <div class="topbar-right">
-                <button id="btn-add-task" class="btn-primary">
-                    <i data-lucide="plus"></i> New Task
+            <div>
+                <button id="btn-add-task" class="bg-indigo-500 hover:bg-indigo-400 text-white px-4 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 transition-colors">
+                    <i data-lucide="plus" class="w-4 h-4"></i> New Task
                 </button>
             </div>
         </header>
 
         <!-- Dashboard View -->
-        <section id="view-dashboard" class="view active">
-            <div class="dashboard-stats">
-                <div class="stat-card stat-overdue">
-                    <div class="stat-number" id="stat-overdue">0</div>
-                    <div class="stat-label">Overdue</div>
+        <section id="view-dashboard" class="view active flex-1 overflow-y-auto p-6">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-surface border border-bdr rounded-xl p-5 text-center">
+                    <div class="text-3xl font-bold text-red-500" id="stat-overdue">0</div>
+                    <div class="text-xs text-gray-400 mt-1 uppercase tracking-wider">Overdue</div>
                 </div>
-                <div class="stat-card stat-today">
-                    <div class="stat-number" id="stat-today">0</div>
-                    <div class="stat-label">Due Today</div>
+                <div class="bg-surface border border-bdr rounded-xl p-5 text-center">
+                    <div class="text-3xl font-bold text-amber-500" id="stat-today">0</div>
+                    <div class="text-xs text-gray-400 mt-1 uppercase tracking-wider">Due Today</div>
                 </div>
-                <div class="stat-card stat-week">
-                    <div class="stat-number" id="stat-week">0</div>
-                    <div class="stat-label">This Week</div>
+                <div class="bg-surface border border-bdr rounded-xl p-5 text-center">
+                    <div class="text-3xl font-bold text-indigo-400" id="stat-week">0</div>
+                    <div class="text-xs text-gray-400 mt-1 uppercase tracking-wider">This Week</div>
                 </div>
-                <div class="stat-card stat-total">
-                    <div class="stat-number" id="stat-total">0</div>
-                    <div class="stat-label">Total Active</div>
+                <div class="bg-surface border border-bdr rounded-xl p-5 text-center">
+                    <div class="text-3xl font-bold text-emerald-500" id="stat-total">0</div>
+                    <div class="text-xs text-gray-400 mt-1 uppercase tracking-wider">Total Active</div>
                 </div>
             </div>
 
-            <div class="dashboard-grid">
-                <!-- Overdue & Today -->
-                <div class="dashboard-panel">
-                    <h3 class="panel-title"><i data-lucide="alert-triangle"></i> Overdue & Due Today</h3>
-                    <div id="dashboard-urgent" class="task-list"></div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="bg-surface border border-bdr rounded-xl p-5 max-h-[400px] overflow-y-auto">
+                    <h3 class="text-sm font-semibold mb-4 flex items-center gap-2 text-gray-400">
+                        <i data-lucide="alert-triangle" class="w-4 h-4"></i> Overdue & Due Today
+                    </h3>
+                    <div id="dashboard-urgent" class="task-list flex flex-col gap-2"></div>
                 </div>
-                <!-- Upcoming this week -->
-                <div class="dashboard-panel">
-                    <h3 class="panel-title"><i data-lucide="clock"></i> Coming Up This Week</h3>
-                    <div id="dashboard-upcoming" class="task-list"></div>
+                <div class="bg-surface border border-bdr rounded-xl p-5 max-h-[400px] overflow-y-auto">
+                    <h3 class="text-sm font-semibold mb-4 flex items-center gap-2 text-gray-400">
+                        <i data-lucide="clock" class="w-4 h-4"></i> Coming Up This Week
+                    </h3>
+                    <div id="dashboard-upcoming" class="task-list flex flex-col gap-2"></div>
                 </div>
-                <!-- Category progress -->
-                <div class="dashboard-panel full-width">
-                    <h3 class="panel-title"><i data-lucide="bar-chart-3"></i> Category Progress</h3>
-                    <div id="dashboard-progress" class="progress-list"></div>
+                <div class="bg-surface border border-bdr rounded-xl p-5 lg:col-span-2">
+                    <h3 class="text-sm font-semibold mb-4 flex items-center gap-2 text-gray-400">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Category Progress
+                    </h3>
+                    <div id="dashboard-progress" class="flex flex-col gap-4"></div>
                 </div>
             </div>
         </section>
 
         <!-- Tasks View -->
-        <section id="view-tasks" class="view">
-            <div class="tasks-toolbar">
-                <div class="filter-group">
-                    <select id="filter-category" class="filter-select">
+        <section id="view-tasks" class="view flex-1 overflow-y-auto p-6">
+            <div class="flex items-center justify-between gap-3 mb-5 flex-wrap">
+                <div class="flex gap-2 flex-wrap">
+                    <select id="filter-category" class="bg-elevated text-gray-200 border border-bdr rounded-lg px-3 py-2 text-xs cursor-pointer focus:outline-none focus:border-indigo-500">
                         <option value="">All Categories</option>
                     </select>
-                    <select id="filter-priority" class="filter-select">
+                    <select id="filter-priority" class="bg-elevated text-gray-200 border border-bdr rounded-lg px-3 py-2 text-xs cursor-pointer focus:outline-none focus:border-indigo-500">
                         <option value="">All Priorities</option>
                         <option value="critical">Critical</option>
                         <option value="high">High</option>
                         <option value="medium">Medium</option>
                         <option value="low">Low</option>
                     </select>
-                    <select id="filter-status" class="filter-select">
+                    <select id="filter-status" class="bg-elevated text-gray-200 border border-bdr rounded-lg px-3 py-2 text-xs cursor-pointer focus:outline-none focus:border-indigo-500">
                         <option value="">All Statuses</option>
                         <option value="not_started">Not Started</option>
                         <option value="in_progress">In Progress</option>
                         <option value="completed">Completed</option>
                     </select>
                 </div>
-                <div class="search-box">
-                    <i data-lucide="search"></i>
-                    <input type="text" id="task-search" placeholder="Search tasks...">
+                <div class="flex items-center gap-2 bg-elevated border border-bdr rounded-lg px-3">
+                    <i data-lucide="search" class="w-4 h-4 text-dim"></i>
+                    <input type="text" id="task-search" placeholder="Search tasks..." class="bg-transparent border-none text-gray-200 py-2 w-48 outline-none placeholder:text-dim text-sm">
                 </div>
             </div>
-            <div id="tasks-list" class="task-list"></div>
+            <div id="tasks-list" class="task-list flex flex-col gap-2"></div>
         </section>
 
         <!-- Calendar View -->
-        <section id="view-calendar" class="view">
-            <div id="calendar-container"></div>
+        <section id="view-calendar" class="view flex-1 overflow-y-auto p-6">
+            <div id="calendar-container" class="bg-surface border border-bdr rounded-xl p-5 calendar-height"></div>
         </section>
 
         <!-- Tree View -->
-        <section id="view-tree" class="view">
-            <div class="tree-toolbar">
-                <button id="tree-zoom-in" class="btn-icon" title="Zoom In"><i data-lucide="zoom-in"></i></button>
-                <button id="tree-zoom-out" class="btn-icon" title="Zoom Out"><i data-lucide="zoom-out"></i></button>
-                <button id="tree-reset" class="btn-icon" title="Reset View"><i data-lucide="maximize-2"></i></button>
+        <section id="view-tree" class="view flex-1 overflow-y-auto p-6">
+            <div class="flex gap-2 mb-4">
+                <button id="tree-zoom-in" class="p-1.5 rounded-lg text-gray-400 hover:bg-hovr hover:text-gray-200 transition-all" title="Zoom In"><i data-lucide="zoom-in" class="w-[18px] h-[18px]"></i></button>
+                <button id="tree-zoom-out" class="p-1.5 rounded-lg text-gray-400 hover:bg-hovr hover:text-gray-200 transition-all" title="Zoom Out"><i data-lucide="zoom-out" class="w-[18px] h-[18px]"></i></button>
+                <button id="tree-reset" class="p-1.5 rounded-lg text-gray-400 hover:bg-hovr hover:text-gray-200 transition-all" title="Reset View"><i data-lucide="maximize-2" class="w-[18px] h-[18px]"></i></button>
             </div>
-            <div id="tree-container"></div>
+            <div id="tree-container" class="bg-surface border border-bdr rounded-xl tree-height overflow-hidden relative"></div>
         </section>
     </main>
 
     <!-- ===== TASK MODAL ===== -->
-    <div id="task-modal" class="modal-overlay hidden">
-        <div class="modal">
-            <div class="modal-header">
-                <h3 id="modal-title">New Task</h3>
-                <button id="modal-close" class="btn-icon"><i data-lucide="x"></i></button>
+    <div id="task-modal" class="modal-overlay hidden fixed inset-0 bg-black/60 flex items-center justify-center z-[200] backdrop-blur-sm">
+        <div class="bg-surface border border-bdr rounded-xl w-[540px] max-w-[90vw] max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-bdr">
+                <h3 id="modal-title" class="text-base font-semibold">New Task</h3>
+                <button id="modal-close" class="p-1.5 rounded-lg text-gray-400 hover:bg-hovr hover:text-gray-200 transition-all"><i data-lucide="x" class="w-[18px] h-[18px]"></i></button>
             </div>
-            <form id="task-form" class="modal-body">
+            <form id="task-form" class="p-6">
                 <input type="hidden" id="task-id">
-                <div class="form-group">
-                    <label for="task-title-input">Title *</label>
-                    <input type="text" id="task-title-input" required placeholder="What needs to be done?">
+                <div class="mb-4">
+                    <label for="task-title-input" class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Title *</label>
+                    <input type="text" id="task-title-input" required placeholder="What needs to be done?" class="w-full bg-elevated text-gray-200 border border-bdr rounded-lg px-3 py-2.5 focus:outline-none focus:border-indigo-500 text-sm">
                 </div>
-                <div class="form-group">
-                    <label for="task-desc-input">Description</label>
-                    <textarea id="task-desc-input" rows="3" placeholder="Additional details..."></textarea>
+                <div class="mb-4">
+                    <label for="task-desc-input" class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Description</label>
+                    <textarea id="task-desc-input" rows="3" placeholder="Additional details..." class="w-full bg-elevated text-gray-200 border border-bdr rounded-lg px-3 py-2.5 focus:outline-none focus:border-indigo-500 text-sm resize-none"></textarea>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="task-category-input">Category</label>
-                        <select id="task-category-input"></select>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <label for="task-category-input" class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Category</label>
+                        <select id="task-category-input" class="w-full bg-elevated text-gray-200 border border-bdr rounded-lg px-3 py-2.5 focus:outline-none focus:border-indigo-500 text-sm"></select>
                     </div>
-                    <div class="form-group">
-                        <label for="task-priority-input">Priority</label>
-                        <select id="task-priority-input">
+                    <div>
+                        <label for="task-priority-input" class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Priority</label>
+                        <select id="task-priority-input" class="w-full bg-elevated text-gray-200 border border-bdr rounded-lg px-3 py-2.5 focus:outline-none focus:border-indigo-500 text-sm">
                             <option value="low">Low</option>
                             <option value="medium" selected>Medium</option>
                             <option value="high">High</option>
@@ -181,45 +206,45 @@
                         </select>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="task-due-input">Due Date</label>
-                        <input type="date" id="task-due-input">
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <label for="task-due-input" class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Due Date</label>
+                        <input type="date" id="task-due-input" class="w-full bg-elevated text-gray-200 border border-bdr rounded-lg px-3 py-2.5 focus:outline-none focus:border-indigo-500 text-sm">
                     </div>
-                    <div class="form-group">
-                        <label for="task-scheduled-input">Scheduled Date</label>
-                        <input type="date" id="task-scheduled-input">
+                    <div>
+                        <label for="task-scheduled-input" class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Scheduled Date</label>
+                        <input type="date" id="task-scheduled-input" class="w-full bg-elevated text-gray-200 border border-bdr rounded-lg px-3 py-2.5 focus:outline-none focus:border-indigo-500 text-sm">
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="task-status-input">Status</label>
-                        <select id="task-status-input">
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <label for="task-status-input" class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Status</label>
+                        <select id="task-status-input" class="w-full bg-elevated text-gray-200 border border-bdr rounded-lg px-3 py-2.5 focus:outline-none focus:border-indigo-500 text-sm">
                             <option value="not_started">Not Started</option>
                             <option value="in_progress">In Progress</option>
                             <option value="completed">Completed</option>
                         </select>
                     </div>
-                    <div class="form-group form-check-group">
-                        <label>
-                            <input type="checkbox" id="task-recurring-input"> Recurring
+                    <div class="flex items-end pb-2.5">
+                        <label class="flex items-center gap-2 text-sm text-gray-200 cursor-pointer">
+                            <input type="checkbox" id="task-recurring-input" class="w-4 h-4 accent-indigo-500"> Recurring
                         </label>
                     </div>
                 </div>
-                <div class="form-group hidden" id="recurrence-group">
-                    <label for="task-recurrence-input">Recurrence</label>
-                    <select id="task-recurrence-input">
+                <div class="mb-4 hidden" id="recurrence-group">
+                    <label for="task-recurrence-input" class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Recurrence</label>
+                    <select id="task-recurrence-input" class="w-full bg-elevated text-gray-200 border border-bdr rounded-lg px-3 py-2.5 focus:outline-none focus:border-indigo-500 text-sm">
                         <option value="daily">Daily</option>
                         <option value="weekly">Weekly</option>
                         <option value="biweekly">Bi-Weekly</option>
                         <option value="monthly">Monthly</option>
                     </select>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" id="btn-delete-task" class="btn-danger hidden">Delete</button>
-                    <div class="modal-footer-right">
-                        <button type="button" id="btn-cancel-task" class="btn-secondary">Cancel</button>
-                        <button type="submit" class="btn-primary">Save Task</button>
+                <div class="flex items-center justify-between pt-2">
+                    <button type="button" id="btn-delete-task" class="bg-red-500 hover:bg-red-400 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors hidden">Delete</button>
+                    <div class="flex gap-2 ml-auto">
+                        <button type="button" id="btn-cancel-task" class="bg-elevated text-gray-200 border border-bdr px-4 py-2 rounded-lg text-sm font-medium hover:bg-hovr transition-all">Cancel</button>
+                        <button type="submit" class="bg-indigo-500 hover:bg-indigo-400 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">Save Task</button>
                     </div>
                 </div>
             </form>
@@ -227,33 +252,33 @@
     </div>
 
     <!-- ===== CATEGORY MODAL ===== -->
-    <div id="category-modal" class="modal-overlay hidden">
-        <div class="modal modal-sm">
-            <div class="modal-header">
-                <h3 id="cat-modal-title">New Category</h3>
-                <button id="cat-modal-close" class="btn-icon"><i data-lucide="x"></i></button>
+    <div id="category-modal" class="modal-overlay hidden fixed inset-0 bg-black/60 flex items-center justify-center z-[200] backdrop-blur-sm">
+        <div class="bg-surface border border-bdr rounded-xl w-[400px] max-w-[90vw] max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-bdr">
+                <h3 id="cat-modal-title" class="text-base font-semibold">New Category</h3>
+                <button id="cat-modal-close" class="p-1.5 rounded-lg text-gray-400 hover:bg-hovr hover:text-gray-200 transition-all"><i data-lucide="x" class="w-[18px] h-[18px]"></i></button>
             </div>
-            <form id="category-form" class="modal-body">
+            <form id="category-form" class="p-6">
                 <input type="hidden" id="cat-id">
-                <div class="form-group">
-                    <label for="cat-name-input">Name *</label>
-                    <input type="text" id="cat-name-input" required placeholder="Category name">
+                <div class="mb-4">
+                    <label for="cat-name-input" class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Name *</label>
+                    <input type="text" id="cat-name-input" required placeholder="Category name" class="w-full bg-elevated text-gray-200 border border-bdr rounded-lg px-3 py-2.5 focus:outline-none focus:border-indigo-500 text-sm">
                 </div>
-                <div class="form-group">
-                    <label for="cat-parent-input">Parent Category</label>
-                    <select id="cat-parent-input">
+                <div class="mb-4">
+                    <label for="cat-parent-input" class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Parent Category</label>
+                    <select id="cat-parent-input" class="w-full bg-elevated text-gray-200 border border-bdr rounded-lg px-3 py-2.5 focus:outline-none focus:border-indigo-500 text-sm">
                         <option value="">(Top Level)</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="cat-color-input">Color</label>
-                    <input type="color" id="cat-color-input" value="#6366f1">
+                <div class="mb-4">
+                    <label for="cat-color-input" class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Color</label>
+                    <input type="color" id="cat-color-input" value="#6366f1" class="w-12 h-9 border border-bdr rounded-lg bg-transparent cursor-pointer p-0.5">
                 </div>
-                <div class="modal-footer">
-                    <button type="button" id="btn-delete-cat" class="btn-danger hidden">Delete</button>
-                    <div class="modal-footer-right">
-                        <button type="button" id="btn-cancel-cat" class="btn-secondary">Cancel</button>
-                        <button type="submit" class="btn-primary">Save</button>
+                <div class="flex items-center justify-between pt-2">
+                    <button type="button" id="btn-delete-cat" class="bg-red-500 hover:bg-red-400 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors hidden">Delete</button>
+                    <div class="flex gap-2 ml-auto">
+                        <button type="button" id="btn-cancel-cat" class="bg-elevated text-gray-200 border border-bdr px-4 py-2 rounded-lg text-sm font-medium hover:bg-hovr transition-all">Cancel</button>
+                        <button type="submit" class="bg-indigo-500 hover:bg-indigo-400 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">Save</button>
                     </div>
                 </div>
             </form>
@@ -261,7 +286,7 @@
     </div>
 
     <!-- ===== TOAST CONTAINER ===== -->
-    <div id="toast-container" class="toast-container"></div>
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[300] flex flex-col gap-2"></div>
 
     <script src="js/supabase-client.js"></script>
     <script src="js/store.js"></script>
