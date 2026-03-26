@@ -173,6 +173,9 @@
     /* Sidebar backdrop */
     #sidebar-backdrop.active { display: block !important; }
 
+    /* Prevent mobile zoom on input focus */
+    input, select, textarea { font-size: 16px !important; }
+
     /* FullCalendar mobile toolbar stacking */
     .fc .fc-toolbar { flex-direction: column; gap: 8px; }
     .fc .fc-toolbar-title { font-size: 0.95rem; }
