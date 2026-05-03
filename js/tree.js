@@ -36,11 +36,13 @@ const TreeView = {
         let treeLayout, linkFn, nodeTransform, initialTransform;
 
         if (isMobile) {
-            treeLayout = d3.tree().size([width - 40, height - 120]);
+            // nodeSize guarantees fixed px between siblings — tree can be wider than screen (user pans)
+            treeLayout = d3.tree().nodeSize([55, 90]);
             treeLayout(root);
             linkFn = d3.linkVertical().x(d => d.x).y(d => d.y);
             nodeTransform = d => `translate(${d.x},${d.y})`;
-            initialTransform = d3.zoomIdentity.translate(20, 40);
+            // Center root horizontally
+            initialTransform = d3.zoomIdentity.translate(width / 2, 40);
         } else {
             treeLayout = d3.tree().size([height - 80, width - 300]);
             treeLayout(root);
@@ -86,27 +88,40 @@ const TreeView = {
                 }
             });
 
-        // Node labels
-        node.append('text')
-            .attr('dy', d => d.data.isTask ? -10 : (d.children ? -22 : 4))
-            .attr('x', d => d.data.isTask ? 10 : (d.children ? 0 : 20))
-            .attr('text-anchor', d => d.data.isTask ? 'start' : (d.children ? 'middle' : 'start'))
+        // Node labels — on mobile: centered above every node, task dots have no label
+        node.filter(d => !(isMobile && d.data.isTask))
+            .append('text')
+            .attr('dy', d => {
+                if (isMobile) return -16;
+                return d.data.isTask ? -10 : (d.children ? -22 : 4);
+            })
+            .attr('x', d => {
+                if (isMobile) return 0;
+                return d.data.isTask ? 10 : (d.children ? 0 : 20);
+            })
+            .attr('text-anchor', d => {
+                if (isMobile) return 'middle';
+                return d.data.isTask ? 'start' : (d.children ? 'middle' : 'start');
+            })
             .text(d => {
                 const name = d.data.name;
-                return name.length > 30 ? name.substring(0, 27) + '...' : name;
+                const limit = isMobile ? 9 : 30;
+                return name.length > limit ? name.substring(0, limit - 1) + '…' : name;
             })
             .style('font-size', d => d.data.isTask ? '11px' : (d.depth === 0 ? '14px' : '12px'))
             .style('font-weight', d => d.depth === 0 ? '600' : '400');
 
-        // Task count badges on category nodes
-        node.filter(d => !d.data.isTask && d.data.taskCount > 0)
-            .append('text')
-            .attr('dy', d => d.children ? -8 : 18)
-            .attr('x', d => d.children ? 0 : 20)
-            .attr('text-anchor', d => d.children ? 'middle' : 'start')
-            .text(d => `${d.data.taskCount} tasks`)
-            .style('font-size', '10px')
-            .style('fill', 'var(--text-dim)');
+        // Task count badges on category nodes — hide on mobile (label is already truncated)
+        if (!isMobile) {
+            node.filter(d => !d.data.isTask && d.data.taskCount > 0)
+                .append('text')
+                .attr('dy', d => d.children ? -8 : 18)
+                .attr('x', d => d.children ? 0 : 20)
+                .attr('text-anchor', d => d.children ? 'middle' : 'start')
+                .text(d => `${d.data.taskCount} tasks`)
+                .style('font-size', '10px')
+                .style('fill', 'var(--text-dim)');
+        }
 
         this.svg = svg;
         this._bindControls();
@@ -158,9 +173,10 @@ const TreeView = {
         document.getElementById('tree-reset').onclick = () => {
             if (this.svg && this.zoomBehavior) {
                 const container = document.getElementById('tree-container');
-                const isMobile = (container.clientWidth || 900) < 600;
-                const resetTransform = isMobile
-                    ? d3.zoomIdentity.translate(20, 40)
+                const w = container.clientWidth || 900;
+                const isMob = w < 600;
+                const resetTransform = isMob
+                    ? d3.zoomIdentity.translate(w / 2, 40)
                     : d3.zoomIdentity.translate(150, 40);
                 this.svg.transition().duration(500).call(
                     this.zoomBehavior.transform,
