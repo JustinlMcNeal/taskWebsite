@@ -2,6 +2,13 @@
 // APP ENTRY POINT — Bootstrap everything
 // ============================================
 (async function init() {
+    // Register service worker (PWA + push notifications)
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch((err) => {
+            console.warn('Service worker registration failed:', err);
+        });
+    }
+
     try {
         // Load data from Supabase
         await Promise.all([
@@ -13,6 +20,9 @@
         UI.init();
         UI.renderCategoryTree();
         UI.renderDashboard();
+
+        // Initialize push notifications UI
+        Notifications.init();
 
         // Initialize icons
         lucide.createIcons();

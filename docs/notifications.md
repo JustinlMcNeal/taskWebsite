@@ -11,11 +11,11 @@
 ## Phases
 
 ### Phase 1 — PWA foundation (required for iOS)
-- [ ] Add `manifest.json` (name, icons, `display: standalone`, `start_url`)
-- [ ] Link `<link rel="manifest">` in `index.html`
-- [ ] Register a service worker (`sw.js`) in `app.js` via `navigator.serviceWorker.register`
-- [ ] `sw.js`: listen for `push` event → call `self.registration.showNotification`
-- [ ] `sw.js`: listen for `notificationclick` event → `clients.openWindow` to the app URL
+- [x] Add `manifest.json` (name, icons, `display: standalone`, `start_url`)
+- [x] Link `<link rel="manifest">` in `index.html`
+- [x] Register a service worker (`sw.js`) in `app.js` via `navigator.serviceWorker.register`
+- [x] `sw.js`: listen for `push` event → call `self.registration.showNotification`
+- [x] `sw.js`: listen for `notificationclick` event → `clients.openWindow` to the app URL
 - [ ] Test: open app in Chrome mobile → "Add to Home Screen" prompt should appear
 
 ### Phase 2 — VAPID key generation & storage
