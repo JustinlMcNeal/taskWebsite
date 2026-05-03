@@ -32,6 +32,25 @@
 }
 .cat-item:hover { background: #2d3041; color: #e4e6ed; }
 .cat-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.cat-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    border: none;
+    background: none;
+    color: #5c6078;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 0;
+    transition: color 0.2s ease;
+}
+.cat-toggle:hover { color: #e4e6ed; }
+.cat-toggle svg { transition: transform 0.2s ease; }
+.cat-toggle.collapsed svg { transform: rotate(-90deg); }
+.cat-children.collapsed { display: none; }
 .cat-count {
     margin-left: auto;
     background: #242736;

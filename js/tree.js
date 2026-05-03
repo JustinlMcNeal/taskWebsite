@@ -11,6 +11,7 @@ const TreeView = {
 
         const width = container.clientWidth || 900;
         const height = container.clientHeight || 600;
+        const isMobile = width < 600;
 
         // Build hierarchy data
         const rootData = this._buildTreeData();
@@ -22,7 +23,7 @@ const TreeView = {
 
         const g = svg.append('g');
 
-        // Zoom
+        // Zoom (supports pinch-to-zoom and touch panning natively)
         this.zoomBehavior = d3.zoom()
             .scaleExtent([0.3, 3])
             .on('zoom', (event) => {
@@ -30,13 +31,24 @@ const TreeView = {
             });
         svg.call(this.zoomBehavior);
 
-        // Create tree layout
+        // Create tree layout — vertical on mobile, horizontal on desktop
         const root = d3.hierarchy(rootData);
-        const treeLayout = d3.tree().size([height - 80, width - 300]);
-        treeLayout(root);
+        let treeLayout, linkFn, nodeTransform, initialTransform;
 
-        // Center the tree
-        const initialTransform = d3.zoomIdentity.translate(150, 40);
+        if (isMobile) {
+            treeLayout = d3.tree().size([width - 40, height - 120]);
+            treeLayout(root);
+            linkFn = d3.linkVertical().x(d => d.x).y(d => d.y);
+            nodeTransform = d => `translate(${d.x},${d.y})`;
+            initialTransform = d3.zoomIdentity.translate(20, 40);
+        } else {
+            treeLayout = d3.tree().size([height - 80, width - 300]);
+            treeLayout(root);
+            linkFn = d3.linkHorizontal().x(d => d.y).y(d => d.x);
+            nodeTransform = d => `translate(${d.y},${d.x})`;
+            initialTransform = d3.zoomIdentity.translate(150, 40);
+        }
+
         svg.call(this.zoomBehavior.transform, initialTransform);
 
         // Draw links
@@ -45,10 +57,7 @@ const TreeView = {
             .enter()
             .append('path')
             .attr('class', 'link')
-            .attr('d', d3.linkHorizontal()
-                .x(d => d.y)
-                .y(d => d.x)
-            );
+            .attr('d', linkFn);
 
         // Draw nodes
         const node = g.selectAll('.node')
@@ -56,7 +65,7 @@ const TreeView = {
             .enter()
             .append('g')
             .attr('class', 'node')
-            .attr('transform', d => `translate(${d.y},${d.x})`);
+            .attr('transform', nodeTransform);
 
         // Node circles
         node.append('circle')
@@ -148,9 +157,14 @@ const TreeView = {
         };
         document.getElementById('tree-reset').onclick = () => {
             if (this.svg && this.zoomBehavior) {
+                const container = document.getElementById('tree-container');
+                const isMobile = (container.clientWidth || 900) < 600;
+                const resetTransform = isMobile
+                    ? d3.zoomIdentity.translate(20, 40)
+                    : d3.zoomIdentity.translate(150, 40);
                 this.svg.transition().duration(500).call(
                     this.zoomBehavior.transform,
-                    d3.zoomIdentity.translate(150, 40)
+                    resetTransform
                 );
             }
         };

@@ -3,6 +3,7 @@
 // ============================================
 const UI = {
     currentView: 'dashboard',
+    _catCollapsed: new Map(),
 
     // ---------- INIT ----------
     init() {
@@ -115,33 +116,58 @@ const UI = {
 
         cats.forEach(cat => {
             const li = document.createElement('li');
+            const children = Store.getChildren(cat.id);
+            const hasChildren = children.length > 0;
+
             const item = document.createElement('div');
             item.className = 'cat-item';
             item.innerHTML = `
+                <button class="cat-toggle" data-cat-id="${cat.id}" title="Toggle" ${hasChildren ? '' : 'style="visibility:hidden;pointer-events:none"'}>
+                    <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                </button>
                 <span class="cat-dot" style="background:${cat.color}"></span>
                 <span class="cat-name">${this._escapeHtml(cat.name)}</span>
                 <span class="cat-count">${Store.getTasksByCategory(cat.id).filter(t => t.status !== 'completed').length}</span>
                 <button class="cat-edit" data-cat-id="${cat.id}" title="Edit"><i data-lucide="pencil"></i></button>
             `;
-            item.querySelector('.cat-name').addEventListener('click', () => {
+
+            // Whole row navigates to filtered tasks
+            item.addEventListener('click', () => {
                 document.getElementById('filter-category').value = cat.id;
                 this.switchView('tasks');
                 this.renderTasksList();
                 this._closeSidebar();
             });
+
+            // Edit button — stop propagation so row click doesn't fire
             item.querySelector('.cat-edit').addEventListener('click', (e) => {
                 e.stopPropagation();
                 this.openCategoryModal(cat);
             });
+
             li.appendChild(item);
 
-            // Children
-            const children = Store.getChildren(cat.id);
-            if (children.length > 0) {
+            // Children with collapse toggle
+            if (hasChildren) {
                 const childUl = document.createElement('ul');
                 childUl.className = 'cat-children';
+
+                const isCollapsed = this._catCollapsed.get(cat.id) === true;
+                if (isCollapsed) {
+                    childUl.classList.add('collapsed');
+                    item.querySelector('.cat-toggle').classList.add('collapsed');
+                }
+
                 this._renderCatLevel(childUl, cat.id);
                 li.appendChild(childUl);
+
+                item.querySelector('.cat-toggle').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const nowCollapsed = !childUl.classList.contains('collapsed');
+                    this._catCollapsed.set(cat.id, nowCollapsed);
+                    childUl.classList.toggle('collapsed', nowCollapsed);
+                    item.querySelector('.cat-toggle').classList.toggle('collapsed', nowCollapsed);
+                });
             }
 
             container.appendChild(li);
