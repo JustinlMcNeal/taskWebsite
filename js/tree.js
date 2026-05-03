@@ -28,6 +28,7 @@ const TreeView = {
             .scaleExtent([0.3, 3])
             .on('zoom', (event) => {
                 g.attr('transform', event.transform);
+                this._updateLabels(event.transform.k);
             });
         svg.call(this.zoomBehavior);
 
@@ -103,11 +104,8 @@ const TreeView = {
                 if (isMobile) return 'middle';
                 return d.data.isTask ? 'start' : (d.children ? 'middle' : 'start');
             })
-            .text(d => {
-                const name = d.data.name;
-                const limit = isMobile ? 9 : 30;
-                return name.length > limit ? name.substring(0, limit - 1) + '…' : name;
-            })
+            // Initial text at scale=1; zoom handler will update dynamically
+            .text(d => this._labelText(d.data.name || '', 1))
             .style('font-size', d => d.data.isTask ? '11px' : (d.depth === 0 ? '14px' : '12px'))
             .style('font-weight', d => d.depth === 0 ? '600' : '400');
 
@@ -124,7 +122,30 @@ const TreeView = {
         }
 
         this.svg = svg;
+        this._updateLabels(1);
         this._bindControls();
+    },
+
+    // Returns display text for a node name given the current zoom scale
+    _labelText(name, scale) {
+        if (scale < 0.5) return '';
+        if (scale < 0.8) return name.length > 5  ? name.substring(0, 4)  + '…' : name;
+        if (scale < 1.2) return name.length > 12 ? name.substring(0, 11) + '…' : name;
+        if (scale < 1.8) return name.length > 22 ? name.substring(0, 21) + '…' : name;
+        return name; // fully zoomed in — show everything
+    },
+
+    // Re-labels every visible node text element based on current scale
+    _updateLabels(scale) {
+        if (!this.svg) return;
+        this.svg.selectAll('.node text').each(function(d) {
+            if (!d || !d.data) return;
+            const name = d.data.name || '';
+            const el = d3.select(this);
+            // Nodes that were intentionally hidden (task dots on mobile) keep empty text
+            if (el.attr('data-hidden') === 'true') return;
+            el.text(scale < 0.5 ? '' : TreeView._labelText(name, scale));
+        });
     },
 
     _buildTreeData() {
