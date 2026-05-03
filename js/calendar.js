@@ -4,6 +4,16 @@
 const CalendarView = {
     calendar: null,
 
+    _isMobile() {
+        return window.innerWidth < 640;
+    },
+
+    _headerToolbar() {
+        return this._isMobile()
+            ? { left: 'prev,next', center: 'title', right: 'listWeek,dayGridMonth' }
+            : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek' };
+    },
+
     render() {
         const container = document.getElementById('calendar-container');
         if (this.calendar) {
@@ -14,12 +24,8 @@ const CalendarView = {
 
         container.innerHTML = '';
         this.calendar = new FullCalendar.Calendar(container, {
-            initialView: 'dayGridMonth',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-            },
+            initialView: this._isMobile() ? 'listWeek' : 'dayGridMonth',
+            headerToolbar: this._headerToolbar(),
             height: '100%',
             events: this._getEvents(),
             editable: true,
@@ -32,11 +38,13 @@ const CalendarView = {
                 const task = Store.tasks.find(t => t.id === info.event.id);
                 if (!task) return;
                 const newDate = info.event.start.toISOString().split('T')[0];
-                // If task had a scheduled_date, update that; otherwise update due_date
                 const field = task.scheduled_date ? 'scheduled_date' : 'due_date';
                 await Store.updateTask(task.id, { [field]: newDate });
                 UI.toast('Task rescheduled');
                 UI.refresh();
+            },
+            windowResize: () => {
+                this.calendar.setOption('headerToolbar', this._headerToolbar());
             },
             dayMaxEvents: 4,
             nowIndicator: true,

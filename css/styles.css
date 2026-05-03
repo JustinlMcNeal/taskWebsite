@@ -205,4 +205,18 @@
 
     /* Toast narrower on mobile */
     .toast { max-width: calc(100vw - 32px); }
+
+    /* Task modal — bottom sheet on mobile */
+    #task-modal {
+        align-items: flex-end !important;
+    }
+    #task-modal > div {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 88vh !important;
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        border-top-left-radius: 1rem !important;
+        border-top-right-radius: 1rem !important;
+    }
 }
