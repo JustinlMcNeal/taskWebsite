@@ -19,12 +19,12 @@
 - [ ] Test: open app in Chrome mobile → "Add to Home Screen" prompt should appear
 
 ### Phase 2 — VAPID key generation & storage
-- [ ] Generate VAPID key pair (run once): `npx web-push generate-vapid-keys`
-- [ ] Store `VAPID_PRIVATE_KEY` and `VAPID_SUBJECT` as Supabase project secrets
-- [ ] Store `VAPID_PUBLIC_KEY` in a `app_config` Supabase table (readable by anon) OR hardcode in `js/notifications.js`
+- [x] Generate VAPID key pair (run once): `npx web-push generate-vapid-keys`
+- [x] Store `VAPID_PRIVATE_KEY` and `VAPID_SUBJECT` as Supabase project secrets
+- [x] Store `VAPID_PUBLIC_KEY` hardcoded in `js/notifications.js`
 
 ### Phase 3 — Supabase: push_subscriptions table
-- [ ] Create table in Supabase SQL editor:
+- [x] Create table in Supabase SQL editor:
   ```sql
   create table push_subscriptions (
     id uuid primary key default gen_random_uuid(),
@@ -116,3 +116,5 @@
 - `web-push` in the Edge Function needs Deno-compatible import: `import webpush from "npm:web-push"`
 - The cron job fires once daily — for overdue reminders a second job at e.g. 9 AM on overdue tasks is optional
 - Test push end-to-end with `web-push send-notification` CLI before wiring the cron
+
+
