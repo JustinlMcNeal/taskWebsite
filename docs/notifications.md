@@ -42,16 +42,12 @@
 
 ### Phase 4 — Frontend: js/notifications.js
 - [ ] Create `js/notifications.js` with a `Notifications` object
-- [ ] `Notifications.init()` — called from `app.js` after Store loads
-  - Check `'Notification' in window && 'serviceWorker' in navigator`
-  - Show a bell icon / banner in the header if not yet subscribed
-- [ ] `Notifications.subscribe()` — triggered by user clicking the bell
-  - Call `Notification.requestPermission()`
-  - Get VAPID public key, call `registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey })`
-  - POST subscription object (`endpoint`, `p256dh`, `auth`) to Supabase `push_subscriptions` table
-  - Update bell icon to "subscribed" state
-- [ ] `Notifications.unsubscribe()` — remove from Supabase + call `subscription.unsubscribe()`
-- [ ] Add `<script src="js/notifications.js"></script>` to `index.html` after `app.js`
+- [x] `Notifications.init()` — checks support, shows bell, reads current subscription state
+- [x] `Notifications.subscribe()` — requests permission, calls `pushManager.subscribe()`, saves to Supabase
+- [x] `Notifications.unsubscribe()` — removes from Supabase, calls `sub.unsubscribe()`
+- [x] `Notifications.toggle()` — switches between subscribe/unsubscribe on bell click
+- [x] `_deviceId()` — generates/persists device ID in localStorage
+- [x] `<script src="js/notifications.js"></script>` added to `index.html`
 
 ### Phase 5 — Bell icon in header
 - [x] Add bell button to the `<header>` in `index.html` (next to "New Task" button)
@@ -63,11 +59,11 @@
 - [x] Create `supabase/functions/send-notifications/index.ts`
 - [x] Logic: queries due tasks, sends push to all subscribers, cleans up 410 Gone
 - [x] VAPID secrets stored via CLI (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`)
-- [ ] Deploy via Supabase dashboard (Docker not available locally)
+- [x] Deployed via Supabase CLI (Docker installed)
 
 ### Phase 7 — Supabase Cron job
-- [ ] Enable `pg_cron` extension in Supabase (Database → Extensions)
-- [ ] Schedule the edge function to run daily at 8 AM:
+- [x] Enable `pg_cron` + `pg_net` extensions
+- [x] Schedule the edge function to run daily at 8 AM:
   ```sql
   select cron.schedule(
     'daily-task-notifications',
@@ -82,9 +78,10 @@
   ```
 
 ### Phase 8 — iOS-specific PWA polish
-- [ ] Add `apple-touch-icon` links in `index.html`
-- [ ] Add `<meta name="apple-mobile-web-app-capable" content="yes">`
-- [ ] Add `<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">`
+- [x] Add `apple-touch-icon` links in `index.html`
+- [x] Add `<meta name="apple-mobile-web-app-capable" content="yes">`
+- [x] Add `<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">`
+- [ ] Create `icons/icon-192.png` and `icons/icon-512.png`
 - [ ] Test: install on iOS 16.4+ → push should arrive when app is backgrounded
 
 ---
