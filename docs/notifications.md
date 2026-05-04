@@ -54,23 +54,16 @@
 - [ ] Add `<script src="js/notifications.js"></script>` to `index.html` after `app.js`
 
 ### Phase 5 — Bell icon in header
-- [ ] Add bell button to the `<header>` in `index.html` (next to "New Task" button)
+- [x] Add bell button to the `<header>` in `index.html` (next to "New Task" button)
   - States: `unsubscribed` (outline bell), `subscribed` (filled bell + indigo), `unsupported` (hidden)
-- [ ] Wire button click → `Notifications.subscribe()` / `Notifications.unsubscribe()` toggle
-- [ ] Persist subscribed state in `localStorage` to remember UI state across page loads
+- [x] Wire button click → `Notifications.subscribe()` / `Notifications.unsubscribe()` toggle
+- [x] Persist subscribed state in `localStorage` to remember UI state across page loads
 
 ### Phase 6 — Supabase Edge Function: send-notifications
-- [ ] Create `supabase/functions/send-notifications/index.ts`
-- [ ] Logic:
-  1. Query all tasks where `due_date = today` OR `due_date = tomorrow` AND `status != 'completed'`
-  2. For each matching task, look up all `push_subscriptions`
-  3. For each subscription, call `web-push` npm library to send a push payload:
-     ```json
-     { "title": "Task Due: <task title>", "body": "Due <date> · <category>", "tag": "<task_id>" }
-     ```
-  4. On `410 Gone` response from push service → delete that subscription from DB
-- [ ] Set environment variables in Supabase dashboard:
-  - `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`
+- [x] Create `supabase/functions/send-notifications/index.ts`
+- [x] Logic: queries due tasks, sends push to all subscribers, cleans up 410 Gone
+- [x] VAPID secrets stored via CLI (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`)
+- [ ] Deploy via Supabase dashboard (Docker not available locally)
 
 ### Phase 7 — Supabase Cron job
 - [ ] Enable `pg_cron` extension in Supabase (Database → Extensions)
