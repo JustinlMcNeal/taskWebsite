@@ -81,7 +81,7 @@
 - [x] Add `apple-touch-icon` links in `index.html`
 - [x] Add `<meta name="apple-mobile-web-app-capable" content="yes">`
 - [x] Add `<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">`
-- [ ] Create `icons/icon-192.png` and `icons/icon-512.png`
+- [x] Create `icons/icon-192.png` and `icons/icon-512.png`
 - [ ] Test: install on iOS 16.4+ → push should arrive when app is backgrounded
 
 ---
